@@ -1,0 +1,35 @@
+#!/bin/bash
+#
+# Munin plugin for monitoring memory used
+#
+# Written by Dh0mp5eur
+#
+case $1 in
+	"config")
+		echo "graph_title Ram Usage"
+        	echo "graph_vlabel Octets"
+        	echo "graph_category system"
+        	echo "ram.label ram"
+		echo "swap.label swap"
+        	echo "graph_args --base 1024"
+		exit 0
+		;;
+	"man")
+		echo "#"
+		echo "Munin plugin for monitoring memory used"
+		echo "#"
+		echo "Written by Dh0mp5eur"
+		echo "#"
+		;;
+	*)
+		let "MemTotal=$(head -1 /proc/meminfo | cut -d':' -f 2 | cut -d'k' -f 1)"
+		let "MemFree=$(head -2 /proc/meminfo | grep MemFree | cut -d':' -f 2 | cut -d'k' -f 1)"
+		let "Buffers=$(head -3 /proc/meminfo | grep Buffers | cut -d':' -f 2 | cut -d'k' -f 1)"
+		let "Cached=$(head -4 /proc/meminfo | grep Cached | cut -d':' -f 2 | cut -d'k' -f 1)"
+		let "Swap=$(head -5 /proc/meminfo | grep Swap | cut -d':' -f 2 | cut -d'k' -f 1)"
+		let "Swap=Swap*1024"
+		let "MemUse=(1024*(MemTotal - (MemFree + Buffers + Cached)))"
+		echo "ram.value $MemUse"
+		echo "swap.value $Swap"
+		;;
+esac
